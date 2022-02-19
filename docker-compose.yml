@@ -1,0 +1,23 @@
+version: '3.7'
+
+services:
+  jenkins:
+    build: .
+    privileged: true
+    user: root
+    restart: on-failure:10
+    ports:
+      - 8080:8080
+    container_name: mjovanc-jenkins
+    volumes:
+      - ./:/jcasc
+      - ~/apps/jenkins:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - CASC_JENKINS_CONFIG=/jcasc/configs/jenkins.yml
+      - JENKINS_OPTS='--prefix=/'
+    logging:
+      driver: 'json-file'
+      options:
+        max-file: '3'
+        max-size: '10m'

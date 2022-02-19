@@ -1,0 +1,48 @@
+jenkins:
+  systemMessage: "Welcome to Jenkins for the Spring Project!"
+  numExecutors: 4
+  mode: NORMAL
+  scmCheckoutRetryCount: 3
+  labelString: "mjovanc"  # we need to specify something here that we will define in our pipeline jobs, choose whatever name you want
+
+  primaryView:
+    all:
+      name: All
+
+tool:
+  jdk:
+    installations:
+    - name: "OpenJDK 16"
+      properties:
+      - installSource:
+          installers:
+          - zip:
+              subdir: "/var/jenkins_home/tools/hudson.model.JDK/OpenJDK_16/jdk-16.0.1"
+              url: "https://download.java.net/java/GA/jdk16.0.1/7147401fd7354114ac51ef3e1328291f/9/GPL/openjdk-16.0.1_linux-x64_bin.tar.gz"
+
+jobs:
+  - script: |
+      job('seedjob-mjovanc') {
+        description('Set up all jobs')
+          
+        scm {
+          git {
+            branches('*/master')
+            remote {
+              credentials('mjovanc-jenkins-key')
+              url('git@github.com:mjovanc/medium-mjovanc-job-dsl.git')
+            }
+          }
+        }
+        steps {
+          dsl {
+            external('*.groovy')
+            removeAction('DELETE')
+            ignoreExisting(ignore = false)
+            removeViewAction('DELETE')
+          }
+        }
+        triggers {
+          cron('@midnight')
+        }
+      }
